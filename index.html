@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ujian Sumatif Informatika IX - Integrasi Aplikasi Perkantoran</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#1e3a8a',
+                            lightBlue: '#2563eb',
+                            accentBlue: '#3b82f6',
+                            yellow: '#f59e0b',
+                            lightYellow: '#fbbf24',
+                            darkYellow: '#d97706',
+                            bgGray: '#f8fafc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Anti-select & Screenshot Prevention */
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Hide elements during print attempt */
+        @media print {
+            html, body {
+                display: none !important;
+            }
+        }
+
+        /* Transitions and animations */
+        .page-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .slide-in {
+            animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Anti-Cheat Overlay Shield */
+        #cheat-shield {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Cheat Violation & Privacy Protection Shield -->
+    <div id="cheat-shield" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex-col items-center justify-center p-6 text-center text-white">
+        <div class="bg-red-600/20 border-2 border-red-500 rounded-2xl p-8 max-w-md w-full shadow-2xl backdrop-blur-md animate-bounce">
+            <div class="w-20 h-20 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-red-400">Peringatan Pelanggaran!</h2>
+            <p class="text-slate-200 text-sm mb-6">
+                Terdeteksi keluar dari sistem, berpindah tab, membagi layar, atau melakukan tindakan kecurangan!
+            </p>
+            <div class="bg-slate-800/80 p-4 rounded-xl text-left text-xs mb-6 border border-slate-700 text-amber-300">
+                <i class="fa-solid fa-circle-info mr-1"></i> Sesuai aturan ujian, pengerjaan Anda telah dibatalkan dan wajib diulang dari awal.
+            </div>
+            <button onclick="resetExamToStart()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition shadow-lg">
+                Ulangi Ujian Dari Awal
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Identity Header Bar -->
+    <header class="bg-gradient-to-r from-brand-blue to-blue-900 text-white shadow-lg border-b-4 border-brand-yellow sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/95 p-1 rounded-xl shadow-md flex items-center justify-center w-11 h-11 shrink-0 border border-brand-yellow">
+                    <img src="https://iili.io/nXntciv.md.png" alt="Logo Madrasah" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=MTsN';">
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm sm:text-base md:text-lg leading-tight tracking-wide text-brand-lightYellow">
+                        UJIAN SUMATIF LINGKUP MATERI
+                    </h1>
+                    <p class="text-xs text-slate-200 font-medium">
+                        Informatika IX | Semester Ganjil | TP 2026-2027
+                    </p>
+                </div>
+            </div>
+            <!-- Dynamic Info (Timer & Student Badge) -->
+            <div id="header-status-bar" class="hidden flex items-center gap-3 ml-auto">
+                <div class="bg-blue-950/80 border border-amber-400/40 rounded-lg px-3 py-1.5 flex items-center space-x-2">
+                    <i class="fa-regular fa-clock text-amber-400 animate-pulse"></i>
+                    <span id="timer-display" class="font-mono font-bold text-amber-300 text-sm sm:text-base">80:00</span>
+                </div>
+                <div class="hidden sm:block text-right border-l border-blue-700/60 pl-3">
+                    <div id="user-badge-name" class="font-semibold text-xs text-white max-w-[120px] truncate">-</div>
+                    <div id="user-badge-class" class="text-[10px] text-amber-300">-</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- 1. LOGIN / IDENTITAS VIEW -->
+        <section id="view-login" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8">
+            <div class="text-center mb-6">
+                <!-- Logo Madrasah Centerpiece -->
+                <img src="https://iili.io/nXntciv.md.png" alt="Logo Madrasah" class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 object-contain drop-shadow-md" onerror="this.onerror=null; this.src='https://placehold.co/120x120/1e3a8a/ffffff?text=MTsN';">
+                <span class="bg-blue-100 text-brand-blue font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
+                    Materi: Integrasi Aplikasi Perkantoran
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-3">
+                    Selamat Datang di Portal Ujian
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">
+                    Isi data identitas diri dengan benar sebelum memulai pengerjaan ujian.
+                </p>
+            </div>
+
+            <div class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        <i class="fa-solid fa-user text-brand-blue mr-1"></i> Nama Lengkap Siswa
+                    </label>
+                    <input type="text" id="input-nama" placeholder="Masukkan Nama Lengkap Anda" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        <i class="fa-solid fa-graduation-cap text-brand-blue mr-1"></i> Kelas
+                    </label>
+                    <input type="text" id="input-kelas" placeholder="Contoh: IX.1 / IX-A" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition text-sm">
+                </div>
+
+                <!-- Web App GAS Endpoint Field (Khusus Guru / Sistem) -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                            <i class="fa-solid fa-database text-brand-blue mr-1"></i> URL Google Apps Script (Database)
+                        </label>
+                        <span class="text-[10px] text-slate-400">Taut Otomatis Ke Spreadsheet</span>
+                    </div>
+                    <input type="url" id="input-gas-url" placeholder="https://script.google.com/macros/s/.../exec" 
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-blue text-xs outline-none bg-slate-50 text-slate-600">
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl text-amber-800 text-xs space-y-1">
+                    <p class="font-bold text-amber-900"><i class="fa-solid fa-shield-halved mr-1"></i> Aturan Penting Ujian:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700">
+                        <li>Waktu pengerjaan adalah <strong>80 Menit</strong>.</li>
+                        <li><strong>Dilarang keluar web, membagi layar, atau membuka tab lain.</strong> Hasil tidak tersimpan dan diulang dari awal!</li>
+                        <li>Seluruh hasil pengerjaan, skor, & rincian jawaban akan disimpan otomatis ke Google Sheets.</li>
+                    </ul>
+                </div>
+
+                <button onclick="startExam()" class="w-full py-3.5 bg-gradient-to-r from-brand-blue to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Mulai Ujian Sekarang
+                </button>
+
+                <!-- Developer Card Badge on Login Screen -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-center gap-3">
+                    <img src="https://iili.io/nXnNu9I.md.jpg" alt="Foto Sandi Kurnianto Koniyo" class="w-12 h-12 rounded-full object-cover border-2 border-brand-yellow shadow-md" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=SKK';">
+                    <div class="text-left text-xs">
+                        <div class="font-bold text-slate-800">Sandi Kurnianto Koniyo</div>
+                        <div class="text-slate-500">Pengembang Sistem | MTs Negeri 2 Kabupaten Gorontalo</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. EXAM VIEW -->
+        <section id="view-exam" class="hidden space-y-5">
+            <!-- Progress Bar & Quick Stats -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <span id="question-badge-type" class="bg-brand-yellow text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded-md">
+                        Pilihan Ganda
+                    </span>
+                    <span id="question-number-title" class="text-slate-700 font-bold text-sm sm:text-base">
+                        Soal 1 dari 20
+                    </span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleGridModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-border-all text-brand-blue"></i> Navigasi Soal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Card Box -->
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-5 sm:p-7 relative min-h-[320px] flex flex-col justify-between">
+                <div id="question-container" class="page-transition slide-in">
+                    <!-- Dynamic Question Text & Options Rendered Here -->
+                </div>
+
+                <!-- Navigation Action Buttons -->
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm transition flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left"></i> Sebelumnya
+                    </button>
+
+                    <button id="btn-next" onclick="navigateQuestion(1)" class="px-5 py-2.5 bg-brand-blue hover:bg-blue-800 text-white rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow">
+                        Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <button id="btn-submit" onclick="confirmSubmitExam()" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-check-double"></i> Selesai Ujian
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. RESULT VIEW -->
+        <section id="view-result" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center space-y-6">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800">
+                    Ujian Selesai!
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">Jawaban Anda telah berhasil dihitung dan dikirim ke database.</p>
+            </div>
+
+            <!-- Database Sync Status Banner -->
+            <div id="db-status-banner" class="max-w-md mx-auto p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border-blue-200">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Mengirimkan data ke Google Sheets...
+            </div>
+
+            <!-- Student Detail Card -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 max-w-md mx-auto text-left text-sm space-y-2">
+                <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                    <span class="text-slate-500">Nama Siswa:</span>
+                    <span id="res-nama" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                    <span class="text-slate-500">Kelas:</span>
+                    <span id="res-kelas" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                    <span class="text-slate-500">Durasi Pengerjaan:</span>
+                    <span id="res-durasi" class="font-bold text-brand-blue">-</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                    <span class="text-slate-500">Analisis Hasil:</span>
+                    <span id="res-detail-count" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Waktu Selesai:</span>
+                    <span id="res-waktu" class="font-bold text-slate-800">-</span>
+                </div>
+            </div>
+
+            <div class="p-6 bg-gradient-to-br from-brand-blue to-blue-900 text-white rounded-2xl max-w-md mx-auto shadow-lg">
+                <div class="text-xs uppercase font-bold tracking-wider text-amber-300 mb-1">Skor Akhir Evaluasi</div>
+                <div id="res-score" class="text-5xl font-black text-white my-2">0</div>
+                <div class="text-xs text-slate-200">
+                    Jumlah Soal: <span class="font-bold text-amber-300">20 Nomor</span> (10 PG, 7 Benar-Salah, 3 Menjodohkan)
+                </div>
+            </div>
+
+            <div class="pt-4 max-w-md mx-auto">
+                <button onclick="location.reload()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Kembali ke Hal Depan
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Custom Notification replacing alert() -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h3 id="custom-modal-title" class="font-bold text-slate-800 text-lg">Pemberitahuan</h3>
+            <p id="custom-modal-body" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button onclick="closeCustomModal()" class="w-full py-2.5 bg-brand-blue text-white font-bold rounded-xl shadow hover:bg-blue-800 text-sm">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- Question Navigation Drawer/Modal -->
+    <div id="grid-modal" class="fixed inset-0 bg-slate-900/60 z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-th-large text-brand-blue"></i> Peta Navigasi Soal
+                </h3>
+                <button onclick="toggleGridModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <div id="grid-container" class="grid grid-cols-5 gap-2.5 max-h-60 overflow-y-auto p-1">
+                <!-- Dynamic Grid Buttons -->
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex justify-between text-xs text-slate-500">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded-sm inline-block"></span> Terjawab</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-brand-blue rounded-sm inline-block"></span> Aktif</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 rounded-sm inline-block"></span> Belum</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer & School Identity Footer -->
+    <footer class="bg-slate-800 text-slate-400 text-xs py-4 border-t border-slate-700 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
+            <div class="flex items-center gap-2">
+                <img src="https://iili.io/nXntciv.md.png" alt="Logo Madrasah" class="w-9 h-9 object-contain shrink-0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=MTsN';">
+                <img src="https://iili.io/nXnNu9I.md.jpg" alt="Foto Sandi Kurnianto Koniyo" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-md shrink-0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=SKK';">
+            </div>
+            <div class="space-y-0.5">
+                <p class="font-semibold text-slate-300">
+                    Aplikasi Ujian Offline Informatika IX &copy; 2026 - MTs Negeri 2 Kabupaten Gorontalo
+                </p>
+                <p class="text-amber-400 font-medium">
+                    <i class="fa-solid fa-code mr-1"></i> Pengembang: <span class="font-bold text-amber-300">Sandi Kurnianto Koniyo, MTs Negeri 2 Kabupaten Gorontalo</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const originalQuestions = [
+            // --- 10 PILIHAN GANDA (PG) ---
+            {
+                type: 'PG',
+                question: 'Fitur OLE (Object Linking and Embedding) pada aplikasi perkantoran digunakan untuk...',
+                options: [
+                    'Menghubungkan data atau objek antar aplikasi dokumen seperti Excel ke Word',
+                    'Mengirim email secara massal menggunakan template otomatis',
+                    'Menghapus latar belakang gambar pada slide presentasi PowerPoint',
+                    'Mengunci file dokumen agar tidak dapat diubah oleh pengguna lain'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Fitur Mail Merge pada Microsoft Word sangat efektif saat digunakan untuk pembuatan...',
+                options: [
+                    'Presentasi multimedia interaktif',
+                    'Surat undangan massal dengan daftar penerima dari Excel',
+                    'Tabel perhitungan rumus keuangan kompleks',
+                    'Logo dan desain vektor grafis'
+                ],
+                answer: 1
+            },
+            {
+                type: 'PG',
+                question: 'Saat menyisipkan grafik (Chart) pada Microsoft Word, aplikasi spreadsheet (Microsoft Excel) otomatis terbuka. Hal ini berfungsi untuk...',
+                options: [
+                    'Mengubah format font pada lembar dokumen Word',
+                    'Mengisi dan mengelola angka/data sumber grafik',
+                    'Mengubah warna tampilan latar belakang Windows',
+                    'Menyimpan file Word menjadi format PDF'
+                ],
+                answer: 1
+            },
+            {
+                type: 'PG',
+                question: 'Perbedaan utama antara fitur "Paste Normal" dan "Paste Link" saat menyalin tabel dari Excel ke Word adalah...',
+                options: [
+                    'Paste Link membuat tabel di Word berubah otomatis jika data Excel diubah',
+                    'Paste Normal membuat ukuran tabel menjadi dua kali lebih besar',
+                    'Paste Link menghapus semua formula angka di Excel',
+                    'Paste Normal memerlukan koneksi internet untuk bekerja'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Manakah dari opsi berikut yang merupakan langkah tepat untuk mengeksport slide Microsoft PowerPoint menjadi dokumen Word (Handout)?',
+                options: [
+                    'File -> Export -> Create Handouts',
+                    'Home -> New Slide -> Import Word',
+                    'Insert -> Object -> Excel Worksheet',
+                    'Design -> Slide Size -> Format Word'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Untuk menghubungkan teks atau tombol dalam slide PowerPoint agar menuju ke dokumen Word luar saat diklik, kita dapat menggunakan fitur...',
+                options: [
+                    'Hyperlink / Link',
+                    'Mail Merge',
+                    'Transition Effect',
+                    'Format Painter'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Ketika kita melakukan "Embed" objek tabel Excel ke dalam file Microsoft Word, data tersebut...',
+                options: [
+                    'Tersimpan menyatu di dalam dokumen Word tanpa tergantung file Excel asli',
+                    'Otomatis terhapus dari harddisk laptop',
+                    'Hanya bisa dibuka jika ada jaringan internet',
+                    'Akan langsung dikirimkan ke email guru'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Perintah kombinasi tombol keyboard cepat untuk menyalin (copy) dan menempel (paste) secara umum adalah...',
+                options: [
+                    'Ctrl + C dan Ctrl + V',
+                    'Ctrl + X dan Ctrl + Z',
+                    'Ctrl + A dan Ctrl + P',
+                    'Ctrl + S dan Ctrl + O'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Untuk menyusun laporan keuangan mingguan yang membutuhkan grafik visual di Word dan data angka fleksibel dari Excel, teknik integrasi terbaik adalah...',
+                options: [
+                    'Paste Special - Paste Link',
+                    'Screenshot manual lalu ditempel',
+                    'Mengetik ulang seluruh angka di Word',
+                    'Menggambar garis grafik manual di Word'
+                ],
+                answer: 0
+            },
+            {
+                type: 'PG',
+                question: 'Daftar sumber data utama penerima surat pada Mail Merge MS Word biasanya tersimpan dalam format file...',
+                options: [
+                    'Microsoft Excel (.xlsx)',
+                    'PowerPoint Slide (.pptx)',
+                    'Paint Image (.bmp)',
+                    'WinRAR Zip (.zip)'
+                ],
+                answer: 0
+            },
+
+            // --- 7 BENAR - SALAH (BS) ---
+            {
+                type: 'BS',
+                question: 'Fitur "Paste Link" pada Paste Special menyebabkan data grafik di Microsoft Word ter-update secara otomatis apabila data angka di file Microsoft Excel diubah.',
+                answer: true
+            },
+            {
+                type: 'BS',
+                question: 'Fitur Mail Merge hanya dapat menggunakan sumber data yang diketik langsung di Microsoft Word dan tidak bisa mengambil file data dari Excel.',
+                answer: false
+            },
+            {
+                type: 'BS',
+                question: 'Grafik (Chart) yang dibuat di MS Word dapat diedit kembali datanya melalui jendela MS Excel yang terintegrasi.',
+                answer: true
+            },
+            {
+                type: 'BS',
+                question: 'Teknik OLE (Object Linking and Embedding) memungkinkan kita memasukkan objek dari satu aplikasi ke aplikasi perkantoran lainnya.',
+                answer: true
+            },
+            {
+                type: 'BS',
+                question: 'Proses menempelkan tabel dengan Paste biasa (Ctrl+V) akan tetap menjaga hubungan link terhubung langsung ke file sumber Excel secara otomatis.',
+                answer: false
+            },
+            {
+                type: 'BS',
+                question: 'Presentasi Microsoft PowerPoint dapat menyisipkan objek video dan audio dari luar sebagai bentuk integrasi media.',
+                answer: true
+            },
+            {
+                type: 'BS',
+                question: 'Kombinasi tombol keyboard Ctrl + C digunakan untuk memotong (Cut) data objek.',
+                answer: false
+            },
+
+            // --- 3 MENJODOHKAN (MATCHING) ---
+            {
+                type: 'MATCH',
+                question: 'Jodohkan istilah fitur integrasi aplikasi perkantoran dengan fungsi utamanya yang tepat:',
+                pairs: [
+                    { id: 'm1', item: 'Mail Merge', correct: 'A', options: ['A. Pembuatan surat massal otomatis', 'B. Penyematan/Penghubungan Objek', 'C. Tautan antar slide / file luar'] },
+                    { id: 'm2', item: 'OLE (Object Linking & Embedding)', correct: 'B', options: ['A. Pembuatan surat massal otomatis', 'B. Penyematan/Penghubungan Objek', 'C. Tautan antar slide / file luar'] },
+                    { id: 'm3', item: 'Hyperlink', correct: 'C', options: ['A. Pembuatan surat massal otomatis', 'B. Penyematan/Penghubungan Objek', 'C. Tautan antar slide / file luar'] }
+                ]
+            },
+            {
+                type: 'MATCH',
+                question: 'Jodohkan Nama Aplikasi Perkantoran dengan jenis file ekstensi default-nya:',
+                pairs: [
+                    { id: 'm4', item: 'Microsoft Word', correct: 'A', options: ['A. Document (.docx)', 'B. Spreadsheet (.xlsx)', 'C. Presentation (.pptx)'] },
+                    { id: 'm5', item: 'Microsoft Excel', correct: 'B', options: ['A. Document (.docx)', 'B. Spreadsheet (.xlsx)', 'C. Presentation (.pptx)'] },
+                    { id: 'm6', item: 'Microsoft PowerPoint', correct: 'C', options: ['A. Document (.docx)', 'B. Spreadsheet (.xlsx)', 'C. Presentation (.pptx)'] }
+                ]
+            },
+            {
+                type: 'MATCH',
+                question: 'Jodohkan aksi integrasi dengan dampak perubahan data pada dokumen tujuan:',
+                pairs: [
+                    { id: 'm7', item: 'Paste Special -> Link', correct: 'A', options: ['A. Data berubah otomatis saat file sumber diubah', 'B. Data tetap terpisah & tersimpan permanen di file tujuan', 'C. Tampilan gambar mati tanpa bisa diedit'] },
+                    { id: 'm8', item: 'Paste Special -> Embed', correct: 'B', options: ['A. Data berubah otomatis saat file sumber diubah', 'B. Data tetap terpisah & tersimpan permanen di file tujuan', 'C. Tampilan gambar mati tanpa bisa diedit'] },
+                    { id: 'm9', item: 'Paste as Picture', correct: 'C', options: ['A. Data berubah otomatis saat file sumber diubah', 'B. Data tetap terpisah & tersimpan permanen di file tujuan', 'C. Tampilan gambar mati tanpa bisa diedit'] }
+                ]
+            }
+        ];
+
+        let activeQuestions = [];
+        let userAnswers = {};
+        let currentQuestionIndex = 0;
+        let timerInterval = null;
+        let timeRemaining = 80 * 60; // 80 Menit
+        let studentInfo = { name: '', class: '' };
+        let isExamStarted = false;
+        let audioCtx = null;
+
+        // Visual & Timing tracking
+        let startTimeObj = null;
+        let endTimeObj = null;
+        let defaultGasUrl = "https://script.google.com/macros/s/AKfycbybNTJpEnPxKCbWmhh2RaWsy4aMlEKsj_Kp1GDXvaAGOgB4jhuDLvfHvQBtVEjV8B10/exec";
+
+        function showCustomModal(title, message) {
+            document.getElementById('custom-modal-title').textContent = title;
+            document.getElementById('custom-modal-body').textContent = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'next') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.12);
+                } else if (type === 'alert') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                // Audio fallback
+            }
+        }
+
+        function triggerViolation() {
+            if (!isExamStarted) return;
+            playSound('alert');
+            const shield = document.getElementById('cheat-shield');
+            shield.classList.remove('hidden');
+            shield.classList.add('flex');
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function resetExamToStart() {
+            isExamStarted = false;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            timeRemaining = 80 * 60;
+            
+            document.getElementById('cheat-shield').classList.add('hidden');
+            document.getElementById('cheat-shield').classList.remove('flex');
+            document.getElementById('header-status-bar').classList.add('hidden');
+            
+            document.getElementById('view-exam').classList.add('hidden');
+            document.getElementById('view-result').classList.add('hidden');
+            document.getElementById('view-login').classList.remove('hidden');
+
+            document.getElementById('input-nama').value = '';
+            document.getElementById('input-kelas').value = '';
+        }
+
+        // Window event protections
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isExamStarted) triggerViolation();
+        });
+
+        window.addEventListener('blur', function() {
+            if (isExamStarted) triggerViolation();
+        });
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        document.addEventListener('keydown', function(e) {
+            if (!isExamStarted) return;
+            if (e.key === 'PrintScreen' || e.keyCode === 44) {
+                e.preventDefault();
+                triggerViolation();
+                return false;
+            }
+            if (e.ctrlKey || e.metaKey) {
+                const forbiddenKeys = ['c', 'v', 'x', 'p', 's', 'u', 'a'];
+                if (forbiddenKeys.includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+                e.preventDefault();
+                triggerViolation();
+                return false;
+            }
+        });
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareRandomizedQuestions() {
+            const shuffled = shuffleArray(originalQuestions);
+            return shuffled.map(q => {
+                if (q.type === 'PG') {
+                    const originalOptions = [...q.options];
+                    const correctAnswerText = originalOptions[q.answer];
+                    const shuffledOptions = shuffleArray(originalOptions);
+                    const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+                    return {
+                        ...q,
+                        options: shuffledOptions,
+                        answer: newCorrectIndex
+                    };
+                }
+                return q;
+            });
+        }
+
+        function startExam() {
+            const namaInput = document.getElementById('input-nama').value.trim();
+            const kelasInput = document.getElementById('input-kelas').value.trim();
+            const customGasUrl = document.getElementById('input-gas-url').value.trim();
+
+            if (!namaInput || !kelasInput) {
+                showCustomModal('Perhatian', 'Silakan isi Nama Lengkap dan Kelas terlebih dahulu!');
+                return;
+            }
+
+            if (customGasUrl) {
+                localStorage.setItem('GAS_EXAM_URL', customGasUrl);
+            }
+
+            studentInfo.name = namaInput;
+            studentInfo.class = kelasInput;
+            startTimeObj = new Date();
+
+            document.getElementById('user-badge-name').textContent = studentInfo.name;
+            document.getElementById('user-badge-class').textContent = 'Kelas: ' + studentInfo.class;
+            document.getElementById('header-status-bar').classList.remove('hidden');
+
+            activeQuestions = prepareRandomizedQuestions();
+            userAnswers = {};
+            currentQuestionIndex = 0;
+
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-exam').classList.remove('hidden');
+
+            isExamStarted = true;
+            playSound('next');
+
+            startTimer();
+            renderCurrentQuestion();
+            renderGridModal();
+        }
+
+        // Auto load saved GAS URL on boot
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('GAS_EXAM_URL');
+            if (savedUrl) {
+                document.getElementById('input-gas-url').value = savedUrl;
+            } else {
+                document.getElementById('input-gas-url').value = defaultGasUrl;
+            }
+        });
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                document.getElementById('timer-display').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    showCustomModal('Waktu Habis', 'Waktu pengerjaan telah habis! Jawaban Anda otomatis dikirim.');
+                    submitExam();
+                } else {
+                    timeRemaining--;
+                }
+            }
+
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function renderCurrentQuestion() {
+            const q = activeQuestions[currentQuestionIndex];
+            const container = document.getElementById('question-container');
+            
+            container.classList.remove('slide-in');
+            void container.offsetWidth;
+            container.classList.add('slide-in');
+
+            document.getElementById('question-number-title').textContent = `Soal ${currentQuestionIndex + 1} dari ${activeQuestions.length}`;
+            
+            const badge = document.getElementById('question-badge-type');
+            if (q.type === 'PG') {
+                badge.textContent = 'Pilihan Ganda';
+                badge.className = 'bg-brand-yellow text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded-md';
+            } else if (q.type === 'BS') {
+                badge.textContent = 'Benar / Salah';
+                badge.className = 'bg-blue-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-md';
+            } else if (q.type === 'MATCH') {
+                badge.textContent = 'Menjodohkan';
+                badge.className = 'bg-purple-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-md';
+            }
+
+            let html = `<div class="mb-5 text-slate-800 text-base sm:text-lg font-medium leading-relaxed">${q.question}</div>`;
+
+            if (q.type === 'PG') {
+                html += `<div class="space-y-3">`;
+                q.options.forEach((opt, idx) => {
+                    const isSelected = userAnswers[currentQuestionIndex] === idx;
+                    const letter = String.fromCharCode(65 + idx);
+                    html += `
+                        <button onclick="selectAnswerPG(${idx})" class="w-full text-left p-3.5 sm:p-4 rounded-xl border-2 transition flex items-start gap-3 ${isSelected ? 'border-brand-blue bg-blue-50/70 text-brand-blue font-semibold shadow-sm' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'}">
+                            <span class="w-7 h-7 rounded-lg font-bold flex items-center justify-center text-xs shrink-0 ${isSelected ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-600'}">
+                                ${letter}
+                            </span>
+                            <span class="text-sm sm:text-base pt-0.5">${opt}</span>
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+            } else if (q.type === 'BS') {
+                const currentVal = userAnswers[currentQuestionIndex];
+                html += `
+                    <div class="grid grid-cols-2 gap-4 max-w-md mx-auto my-6">
+                        <button onclick="selectAnswerBS(true)" class="p-5 rounded-2xl border-2 text-center transition flex flex-col items-center justify-center gap-2 ${currentVal === true ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-bold shadow' : 'border-slate-200 hover:border-emerald-300 text-slate-600'}">
+                            <i class="fa-solid fa-circle-check text-3xl ${currentVal === true ? 'text-emerald-500' : 'text-slate-300'}"></i>
+                            <span class="text-base">BENAR</span>
+                        </button>
+                        <button onclick="selectAnswerBS(false)" class="p-5 rounded-2xl border-2 text-center transition flex flex-col items-center justify-center gap-2 ${currentVal === false ? 'border-red-500 bg-red-50 text-red-700 font-bold shadow' : 'border-slate-200 hover:border-red-300 text-slate-600'}">
+                            <i class="fa-solid fa-circle-xmark text-3xl ${currentVal === false ? 'text-red-500' : 'text-slate-300'}"></i>
+                            <span class="text-base">SALAH</span>
+                        </button>
+                    </div>
+                `;
+            } else if (q.type === 'MATCH') {
+                if (!userAnswers[currentQuestionIndex]) {
+                    userAnswers[currentQuestionIndex] = {};
+                }
+                html += `<div class="space-y-4 my-4">`;
+                q.pairs.forEach((pair) => {
+                    const selectedVal = userAnswers[currentQuestionIndex][pair.id] || '';
+                    html += `
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="font-semibold text-slate-700 text-sm sm:text-base">${pair.item}</div>
+                            <select onchange="selectAnswerMatch('${pair.id}', this.value)" class="w-full sm:w-auto px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm font-medium focus:ring-2 focus:ring-brand-blue outline-none">
+                                <option value="">-- Pilih Pasangan --</option>
+                                ${pair.options.map((opt) => {
+                                    const optKey = opt.charAt(0);
+                                    return `<option value="${optKey}" ${selectedVal === optKey ? 'selected' : ''}>${opt}</option>`;
+                                }).join('')}
+                            </select>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+
+            document.getElementById('btn-prev').disabled = (currentQuestionIndex === 0);
+            
+            if (currentQuestionIndex === activeQuestions.length - 1) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next').classList.remove('hidden');
+                document.getElementById('btn-submit').classList.add('hidden');
+            }
+
+            renderGridModal();
+        }
+
+        function selectAnswerPG(idx) {
+            playSound('click');
+            userAnswers[currentQuestionIndex] = idx;
+            renderCurrentQuestion();
+        }
+
+        function selectAnswerBS(val) {
+            playSound('click');
+            userAnswers[currentQuestionIndex] = val;
+            renderCurrentQuestion();
+        }
+
+        function selectAnswerMatch(pairId, val) {
+            playSound('click');
+            if (!userAnswers[currentQuestionIndex]) {
+                userAnswers[currentQuestionIndex] = {};
+            }
+            userAnswers[currentQuestionIndex][pairId] = val;
+            renderGridModal();
+        }
+
+        function navigateQuestion(direction) {
+            playSound('next');
+            const newIdx = currentQuestionIndex + direction;
+            if (newIdx >= 0 && newIdx < activeQuestions.length) {
+                currentQuestionIndex = newIdx;
+                renderCurrentQuestion();
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            playSound('click');
+            currentQuestionIndex = idx;
+            renderCurrentQuestion();
+            toggleGridModal();
+        }
+
+        function toggleGridModal() {
+            document.getElementById('grid-modal').classList.toggle('hidden');
+        }
+
+        function isQuestionAnswered(qIdx) {
+            const ans = userAnswers[qIdx];
+            if (ans === undefined || ans === null) return false;
+            
+            const qType = activeQuestions[qIdx].type;
+            if (qType === 'MATCH') {
+                const keys = Object.keys(ans);
+                if (keys.length < activeQuestions[qIdx].pairs.length) return false;
+                return keys.every(k => ans[k] !== '');
+            }
+            return true;
+        }
+
+        function renderGridModal() {
+            const gridContainer = document.getElementById('grid-container');
+            let html = '';
+            
+            activeQuestions.forEach((q, idx) => {
+                const isAnswered = isQuestionAnswered(idx);
+                const isActive = idx === currentQuestionIndex;
+                
+                let btnStyle = 'bg-slate-100 text-slate-700 hover:bg-slate-200';
+                if (isActive) {
+                    btnStyle = 'bg-brand-blue text-white ring-2 ring-brand-yellow font-bold';
+                } else if (isAnswered) {
+                    btnStyle = 'bg-emerald-500 text-white font-semibold';
+                }
+
+                html += `
+                    <button onclick="jumpToQuestion(${idx})" class="h-10 rounded-lg text-xs flex items-center justify-center transition ${btnStyle}">
+                        ${idx + 1}
+                    </button>
+                `;
+            });
+
+            gridContainer.innerHTML = html;
+        }
+
+        function confirmSubmitExam() {
+            let unanswered = 0;
+            for (let i = 0; i < activeQuestions.length; i++) {
+                if (!isQuestionAnswered(i)) unanswered++;
+            }
+
+            let msg = 'Apakah Anda yakin ingin menyelesaikan dan mengirimkan ujian ini ke database?';
+            if (unanswered > 0) {
+                msg = `Masih ada ${unanswered} nomor soal yang BELUM dijawab. Anda yakin ingin menyelesaikan?`;
+            }
+
+            showCustomModalConfirm(msg, () => {
+                submitExam();
+            });
+        }
+
+        function showCustomModalConfirm(msg, onConfirm) {
+            showCustomModal('Konfirmasi Selesai', msg);
+            const btnContainer = document.getElementById('custom-modal').querySelector('button').parentElement;
+            btnContainer.innerHTML = `
+                <div class="flex gap-2">
+                    <button onclick="closeCustomModal()" class="w-1/2 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl text-sm">Batal</button>
+                    <button id="btn-modal-yes" class="w-1/2 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-sm shadow">Ya, Selesai</button>
+                </div>
+            `;
+            document.getElementById('btn-modal-yes').onclick = () => {
+                closeCustomModal();
+                onConfirm();
+            };
+        }
+
+        function submitExam() {
+            isExamStarted = false;
+            if (timerInterval) clearInterval(timerInterval);
+
+            endTimeObj = new Date();
+
+            // Hitung durasi pengerjaan
+            const durationMs = endTimeObj - startTimeObj;
+            const durationSecTotal = Math.floor(durationMs / 1000);
+            const durasiMenit = Math.floor(durationSecTotal / 60);
+            const durasiDetik = durationSecTotal % 60;
+            const durasiString = `${durasiMenit} Menit ${durasiDetik} Detik`;
+
+            let totalCorrect = 0;
+            let totalPointsPossible = 0;
+            let rincianPerSoal = [];
+
+            activeQuestions.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                let isCorrect = false;
+                let userAnswerString = '';
+
+                if (q.type === 'PG') {
+                    totalPointsPossible += 1;
+                    if (userAns === q.answer) {
+                        totalCorrect += 1;
+                        isCorrect = true;
+                    }
+                    userAnswerString = (userAns !== undefined && userAns !== null) ? `Opsi ${String.fromCharCode(65 + userAns)}` : 'Kosong';
+                } else if (q.type === 'BS') {
+                    totalPointsPossible += 1;
+                    if (userAns === q.answer) {
+                        totalCorrect += 1;
+                        isCorrect = true;
+                    }
+                    userAnswerString = (userAns === true) ? 'BENAR' : (userAns === false ? 'SALAH' : 'Kosong');
+                } else if (q.type === 'MATCH') {
+                    let subCorrect = 0;
+                    let matchPairsFormatted = [];
+                    q.pairs.forEach(pair => {
+                        totalPointsPossible += 1;
+                        const val = userAns ? userAns[pair.id] : '';
+                        if (val === pair.correct) {
+                            subCorrect += 1;
+                        }
+                        matchPairsFormatted.push(`${pair.item}=${val || '?'}`);
+                    });
+                    if (subCorrect === q.pairs.length) isCorrect = true;
+                    userAnswerString = matchPairsFormatted.join(', ');
+                }
+
+                rincianPerSoal.push({
+                    no: idx + 1,
+                    type: q.type,
+                    isCorrect: isCorrect,
+                    userAnswer: userAnswerString
+                });
+            });
+
+            const finalScore = Math.round((totalCorrect / totalPointsPossible) * 100);
+            const totalSalah = totalPointsPossible - totalCorrect;
+
+            // Display UI Result
+            document.getElementById('res-nama').textContent = studentInfo.name;
+            document.getElementById('res-kelas').textContent = studentInfo.class;
+            document.getElementById('res-durasi').textContent = durasiString;
+            document.getElementById('res-detail-count').textContent = `${totalCorrect} Benar / ${totalSalah} Salah`;
+            document.getElementById('res-waktu').textContent = endTimeObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA';
+            document.getElementById('res-score').textContent = finalScore;
+
+            // Swapping View
+            document.getElementById('view-exam').classList.add('hidden');
+            document.getElementById('header-status-bar').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+
+            playSound('next');
+
+            // Kirim Data ke Google Apps Script Database
+            sendDataToGoogleSheets({
+                nama: studentInfo.name,
+                kelas: studentInfo.class,
+                waktuMulai: startTimeObj.toLocaleString('id-ID'),
+                waktuSelesai: endTimeObj.toLocaleString('id-ID'),
+                durasi: durasiString,
+                statusUjian: "SELESAI",
+                skor: finalScore,
+                jumlahBenar: totalCorrect,
+                jumlahSalah: totalSalah,
+                totalSoal: totalPointsPossible,
+                rincianPerSoal: rincianPerSoal,
+                soalList: activeQuestions
+            });
+        }
+
+        function sendDataToGoogleSheets(payload) {
+            const statusBanner = document.getElementById('db-status-banner');
+            const targetUrl = document.getElementById('input-gas-url').value.trim() || localStorage.getItem('GAS_EXAM_URL') || defaultGasUrl;
+
+            if (!targetUrl || targetUrl.includes('EXAMPLE_REPLACE')) {
+                statusBanner.className = "max-w-md mx-auto p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border-amber-300";
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Ujian Selesai! URL Google Apps Script belum diisi, data tersimpan secara lokal.`;
+                return;
+            }
+
+            statusBanner.className = "max-w-md mx-auto p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border-blue-200";
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan hasil ujian ke Database Google Sheets...`;
+
+            fetch(targetUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                statusBanner.className = "max-w-md mx-auto p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-300";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Berhasil Tersimpan! Data ujian & durasi telah dicatat di Google Sheets.`;
+            })
+            .catch(err => {
+                console.error("Gagal mengirim data:", err);
+                statusBanner.className = "max-w-md mx-auto p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 bg-red-50 text-red-800 border-red-300";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-600"></i> Koneksi Terputus: Data tersimpan di memori perangkat.`;
+            });
+        }
+    </script>
+</body>
+</html>
